@@ -31,7 +31,7 @@ def get_db_connection():
 
 @app.route("/")
 def index():
-    return "Server is running!"
+    return render_template("index.html")
 
 # Når en bruker kobler til
 @socketio.on("connect")
