@@ -5,6 +5,24 @@ import sqlite3
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*") 
 
+import sqlite3
+
+# Lag database hvis den ikke eksisterer
+def init_db():
+    conn = sqlite3.connect("chat.db")
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS messages (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        sender TEXT,
+                        receiver TEXT,
+                        message TEXT
+                    )''')
+    conn.commit()
+    conn.close()
+
+init_db()  # Kjører denne ved oppstart
+
+
 # Lagrer aktive brukere
 users = {}
 
