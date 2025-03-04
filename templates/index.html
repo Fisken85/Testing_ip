@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+</head>
+<body>
+    <h1>Sigma test 107</h1>
+    
+    <label for="username">Brukernavn:</label>
+    <input type="text" id="username">
+    <button onclick="registerUser()">Lag session_ID</button>
+
+    <br><br>
+
+    <label for="receiver">Send melding til:</label>
+    <input type="text" id="receiver">
+    <input type="text" id="message">
+    <button onclick="sendMessage()">Send</button>
+
+    <h2>Meldinger:</h2>
+    <div id="chat"></div>
+
+    <script>
+        var socket = io.connect("http://127.0.0.1:5000");  // Kobler til serveren
+        var username = "";
+
+        function registerUser() {
+            username = document.getElementById("username").value;
+            socket.emit("register", { "username": username });
+            alert("Registrert som " + username);
+        }
+
+        function sendMessage() {
+            var receiver = document.getElementById("receiver").value;
+            var message = document.getElementById("message").value;
+
+            socket.emit("private_message", { "from": username, "to": receiver, "message": message });
+
+            document.getElementById("chat").innerHTML += "<p><b>Til " + receiver + ":</b> " + message + "</p>";
+        }
+
+        socket.on("message", function(data) {
+            document.getElementById("chat").innerHTML += "<p><b>Fra " + data.from + ":</b> " + data.message + "</p>";
+        });
+    </script>
+</body>
+</html>
