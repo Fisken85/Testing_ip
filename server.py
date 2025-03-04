@@ -4,6 +4,10 @@ import sqlite3
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*") 
+@app.route("/")
+def home():
+    return "Server is running!"
+
 
 import sqlite3
 
@@ -40,7 +44,7 @@ def index():
 # Når en bruker kobler til
 @socketio.on("connect")
 def handle_connect():
-    print(f"🔗 Bruker koblet til: {request.sid}")
+        (f"🔗 Bruker koblet til: {request.sid}")
 
 # Når en bruker registrerer seg
 @socketio.on("register")
