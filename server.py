@@ -38,12 +38,18 @@ def index():
 def handle_connect():
     print(f"Bruker koblet til: {request.sid}")
 
-# Når en bruker registrerer seg
+# Lagrer ID til brukeren pemanent
 @socketio.on("register")
 def register(data):
     username = data["username"]
-    users[username] = request.sid
-    print(f"{username} registrert med ID {request.sid}")
+    
+    # Hvis brukeren allerede er registrert, oppdater `sid`
+    if username in users:
+        print(f"{username} oppdaterte session ID til {request.sid}")
+    else:
+        print(f"{username} registrert med ID {request.sid}")
+    
+    users[username] = request.sid  # Oppdater ID-en til brukeren
 
 # Når en melding sendes
 @socketio.on("private_message")

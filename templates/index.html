@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Sigma test 107</h1>
-    
+
     <label for="username">Brukernavn:</label>
     <input type="text" id="username">
     <button onclick="registerUser()">Lag session_ID</button>
@@ -24,11 +24,18 @@
     <div id="chat"></div>
 
     <script>
-        var socket = io.connect("https://testing-ip-vpq3.onrender.com");  // Server tilkobling
-        var username = "";
+        var socket = io.connect("https://testing-ip-vpq3.onrender.com");  
+        var username = localStorage.getItem("username"); 
+
+        if (username) {
+            socket.emit("register", { "username": username }); 
+            console.log("Gjenopptok session for:", username);
+            document.getElementById("username").value = username;  
+        }
 
         function registerUser() {
             username = document.getElementById("username").value;
+            localStorage.setItem("username", username); 
             socket.emit("register", { "username": username });
             alert("Registrert som " + username);
         }
@@ -36,7 +43,6 @@
         function sendMessage() {
             var receiver = document.getElementById("receiver").value;
             var message = document.getElementById("message").value;
-
             socket.emit("private_message", { "from": username, "to": receiver, "message": message });
 
             document.getElementById("chat").innerHTML += "<p><b>Til " + receiver + ":</b> " + message + "</p>";
