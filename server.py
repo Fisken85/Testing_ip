@@ -3,15 +3,15 @@ from flask_socketio import SocketIO, emit
 import sqlite3
 import os
 import base64
+import time
 from database import init_db, get_db_connection  # Importere funksjonene fra database.py
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Opprett mappe for lagring av bilder hvis den ikke finnes
-UPLOAD_FOLDER = "bilde"
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Opprett mappe for bilder hvis den ikke finnes
+UPLOAD_FOLDER = "static/bilder"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Lagrer aktive brukere
 users = {}
@@ -69,13 +69,13 @@ def private_message(data):
 def handle_image(data):
     sender = data["from"]
     receiver = data["to"]
-    image_data = data["image"]  # Base64-kodet bilde
+    image_data = data["image"]
 
     if receiver in users:
         receiver_sid = users[receiver]
 
         # Lag et unikt filnavn for bildet
-        image_filename = f"{sender}_{receiver}_{int(os.time())}.png"
+        image_filename = f"{sender}_{receiver}_{int(time.time())}.png"
         image_path = os.path.join(UPLOAD_FOLDER, image_filename)
 
         # Lagre bildet som en fil
@@ -106,4 +106,4 @@ def handle_disconnect():
         print(f"Ukjent bruker koblet fra: {request.sid}")
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=False)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
