@@ -1,45 +1,36 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_from_directory
 from flask_socketio import SocketIO, emit
 import sqlite3
-from database import init_db, get_db_connection #Importere funksjonene fra database.py
+import os
+import base64
+from database import init_db, get_db_connection  # Importere funksjonene fra database.py
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Init database ved oppstart
-def init_db():
-    conn = sqlite3.connect("chat.db")
-    cursor = conn.cursor()
-    cursor.execute('''CREATE TABLE IF NOT EXISTS messages (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        sender TEXT,
-                        receiver TEXT,
-                        message TEXT
-                    )''')
-    conn.commit()
-    conn.close()
-
-init_db()
+# Opprett mappe for lagring av bilder hvis den ikke finnes
+UPLOAD_FOLDER = "bilde"
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 # Lagrer aktive brukere
 users = {}
 
-# Database tilkobling
-def get_db_connection():
-    conn = sqlite3.connect("chat.db")
-    conn.row_factory = sqlite3.Row
-    return conn
-
 @app.route("/")
 def index():
     return render_template("index.html")
+
+# Rute for å hente lagrede bilder
+@app.route("/bilde/<path:filename>")
+def get_image(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 # Når en bruker kobler til
 @socketio.on("connect")
 def handle_connect():
     print(f"Bruker koblet til: {request.sid}")
 
-# Lagrer ID til brukeren pemanent
+# Lagrer ID til brukeren permanent
 @socketio.on("register")
 def register(data):
     username = data["username"]
@@ -73,6 +64,32 @@ def private_message(data):
     conn.commit()
     conn.close()
 
+# Håndterer sending av bilder
+@socketio.on("send_image")
+def handle_image(data):
+    sender = data["from"]
+    receiver = data["to"]
+    image_data = data["image"]  # Base64-kodet bilde
+
+    if receiver in users:
+        receiver_sid = users[receiver]
+
+        # Lag et unikt filnavn for bildet
+        image_filename = f"{sender}_{receiver}_{int(os.time())}.png"
+        image_path = os.path.join(UPLOAD_FOLDER, image_filename)
+
+        # Lagre bildet som en fil
+        with open(image_path, "wb") as img_file:
+            img_file.write(base64.b64decode(image_data))
+
+        image_url = f"/bilde/{image_filename}"  # Dynamisk bilde-URL
+
+        # Send bildet til mottakeren
+        emit("receive_image", {"from": sender, "image_url": image_url}, to=receiver_sid)
+        print(f"Bilde sendt fra {sender} til {receiver} ({image_url})")
+    else:
+        print(f"{receiver} ikke funnet!")
+
 # Når en bruker kobler fra
 @socketio.on("disconnect")
 def handle_disconnect():
@@ -89,4 +106,4 @@ def handle_disconnect():
         print(f"Ukjent bruker koblet fra: {request.sid}")
 
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=False)
