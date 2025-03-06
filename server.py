@@ -21,7 +21,7 @@ def index():
     return render_template("index.html")
 
 # Rute for å hente lagrede bilder
-@app.route("/bilde/<path:filename>")
+@app.route("/static/bilder/<path:filename>")
 def get_image(filename):
     return send_from_directory(UPLOAD_FOLDER, filename)
 
@@ -82,7 +82,7 @@ def handle_image(data):
         with open(image_path, "wb") as img_file:
             img_file.write(base64.b64decode(image_data))
 
-        image_url = f"/bilde/{image_filename}"  # Dynamisk bilde-URL
+        image_url = f"/static/bilder/{image_filename}"  # Korrekt sti for Flask
 
         # Send bildet til mottakeren
         emit("receive_image", {"from": sender, "image_url": image_url}, to=receiver_sid)
