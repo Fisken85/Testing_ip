@@ -70,12 +70,17 @@ def handle_image(data):
     sender = data["from"]
     receiver = data["to"]
     image_data = data["image"]
+    file_format = data.get("format", "png")  # Standard til PNG hvis ikke oppgitt
+
+    if file_format not in ["png", "jpg", "jpeg", "gif"]:  # Tillatte formater
+        print(f"Ugyldig filformat: {file_format}")
+        return
 
     if receiver in users:
         receiver_sid = users[receiver]
 
-        # Lag et unikt filnavn for bildet
-        image_filename = f"{sender}_{receiver}_{int(time.time())}.png"
+        # Lag et unikt filnavn med riktig format
+        image_filename = f"{sender}_{receiver}_{int(time.time())}.{file_format}"
         image_path = os.path.join(UPLOAD_FOLDER, image_filename)
 
         # Lagre bildet som en fil
