@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </head>
 <body>
-    <h1>Sigma test 137</h1>
+    <h1>Sigma test 157/h1>
 
     <label for="username">Brukernavn:</label>
     <input type="text" id="username">
@@ -22,6 +23,11 @@
 
     <h2>Meldinger:</h2>
     <div id="chat"></div>
+
+    <label for="imageInput">Velg bilde:</label>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="sendImage()">.</button>
+
 
     <script>
         var socket = io.connect("https://testing-ip-vpq3.onrender.com");  

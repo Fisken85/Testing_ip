@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 import sqlite3
+from database import init_db, get_db_connection #Importere funksjonene fra database.py
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
