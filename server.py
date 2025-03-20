@@ -43,7 +43,7 @@ def register(data):
     
     users[username] = request.sid  # Oppdater ID-en til brukeren
 
-# Når en melding sendes
+# Bruker sender melding
 @socketio.on("private_message")
 def private_message(data):
     sender = data["from"]
