@@ -81,7 +81,7 @@
 
             var reader = new FileReader();
             reader.onload = function(event) {
-                var base64Image = event.target.result.split(",")[1]; // Fjern Base64-header
+                var base64Image = event.target.result.split(",")[1]; // Fjerner Base64-header
                 socket.emit("send_image", {
                     "from": username,
                     "to": receiver,
