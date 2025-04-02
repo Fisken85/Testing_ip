@@ -85,9 +85,9 @@
       { image: '../Images/Xhand.png', answer: 'X' },
       { image: '../Images/Yhand.png', answer: 'Y' },
       { image: '../Images/Zhand.png', answer: 'Z' },
-      { image: '../Images/AEhand.png', answer: 'Æ' },
-      { image: '../Images/OOhand.png', answer: 'Ø' },
-      { image: '../Images/AAhand.png', answer: 'Å' }
+      { image: '../Images/Æhand.png', answer: 'Æ' },
+      { image: '../Images/Øhand.png', answer: 'Ø' },
+      { image: '../Images/Åhand.png', answer: 'Å' }
     ];
 
     let currentIndex = -1;
@@ -108,7 +108,7 @@
       flashcardElement.innerHTML = '';
       const img = document.createElement('img');
       img.src = flashcards[currentIndex].image;
-      img.alt = `Flashcard ${flashcards[currentIndex].answer}`;
+      img.alt = "Flashcard image"; // Generic alt text to avoid revealing the answer.
       img.onerror = () => console.error("Error loading image:", img.src);
       flashcardElement.appendChild(img);
     }
