@@ -4,13 +4,7 @@ import sqlite3
 import os
 import base64
 import time
-import cloudinary
-import cloudinary.uploader
 from database import init_db, get_db_connection  # Importere funksjonene fra database.py
-from dotenv import load_dotenv
-
-# Last inn miljøvariabler fra .env-filen
-load_dotenv()
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -21,13 +15,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Lagrer aktive brukere
 users = {}
-
-# Konfigurer Cloudinary
-cloudinary.config(
-  cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-  api_key=os.environ.get('CLOUDINARY_API_KEY'),
-  api_secret=os.environ.get('CLOUDINARY_API_SECRET')
-)
 
 @app.route("/")
 def index():
@@ -87,30 +74,19 @@ def handle_image(data):
     if receiver in users:
         receiver_sid = users[receiver]
 
-        # Last opp bildet til Cloudinary
-        try:
-            # Dekode base64-bildedata
-            image = base64.b64decode(image_data)
+        # Lag et unikt filnavn for bildet
+        image_filename = f"{sender}_{receiver}_{int(time.time())}.png"
+        image_path = os.path.join(UPLOAD_FOLDER, image_filename)
 
-            # Lagre bildet midlertidig på serveren for opplasting til Cloudinary
-            temp_image_path = os.path.join(UPLOAD_FOLDER, f"{sender}_{receiver}_{int(time.time())}.png")
-            with open(temp_image_path, "wb") as f:
-                f.write(image)
+        # Lagre bildet som en fil
+        with open(image_path, "wb") as img_file:
+            img_file.write(base64.b64decode(image_data))
 
-            # Last opp til Cloudinary
-            upload_result = cloudinary.uploader.upload(temp_image_path)
+        image_url = f"/static/bilder/{image_filename}"  # Korrekt sti for Flask
 
-            # Hent URL til det opplastede bildet
-            image_url = upload_result['secure_url']
-
-            # Slett midlertidig bilde
-            os.remove(temp_image_path)
-
-            # Send bildet til mottakeren via socket.io
-            emit("receive_image", {"from": sender, "image_url": image_url}, to=receiver_sid)
-            print(f"Bilde sendt fra {sender} til {receiver} ({image_url})")
-        except Exception as e:
-            print(f"Feil under bildeopplasting til Cloudinary: {e}")
+        # Send bildet til mottakeren
+        emit("receive_image", {"from": sender, "image_url": image_url}, to=receiver_sid)
+        print(f"Bilde sendt fra {sender} til {receiver} ({image_url})")
     else:
         print(f"{receiver} ikke funnet!")
 

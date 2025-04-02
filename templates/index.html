@@ -8,7 +8,7 @@
     <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
 </head>
 <body>
-    <h1>Sigma test 182</h1>
+    <h1>Sigma test 160</h1>
 
     <h2>Logg inn</h2>
     <label for="username">Brukernavn:</label>
@@ -35,7 +35,7 @@
     <button onclick="sendImage()">.</button>
 
     <script>
-        var socket = io.connect("https://testing-ip-vpq3.onrender.com/"); 
+        var socket = io.connect("http://109.70.85.48:5000"); 
         var username = localStorage.getItem("username"); 
 
         if (username) {
