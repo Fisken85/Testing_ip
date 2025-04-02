@@ -1,6 +1,7 @@
-flask
-flask-socketio
+Flask
+Flask-SocketIO
 eventlet
 gevent
 gevent-websocket
-
+cloudinary
+python-dotenv
