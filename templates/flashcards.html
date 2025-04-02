@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Flashcards</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f4f4f4;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+    }
+
+    .flashcard {
+      width: 320px;
+      height: 450px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      padding: 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .flashcard:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .flashcard img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 4px;
+      transition: opacity 0.3s ease;
+    }
+
+    .flashcard p {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #333333;
+      transition: opacity 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="flashcard" id="flashcard"></div>
+  
+  <script>
+    const flashcards = [
+      { image: '../Images/Ahand.png', answer: 'A' },
+      { image: '../Images/Bhand.png', answer: 'B' },
+      { image: '../Images/Chand.png', answer: 'C' },
+      { image: '../Images/Dhand.png', answer: 'D' },
+      { image: '../Images/Ehand.png', answer: 'E' },
+      { image: '../Images/Fhand.png', answer: 'F' },
+      { image: '../Images/Ghand.png', answer: 'G' },
+      { image: '../Images/Hhand.png', answer: 'H' },
+      { image: '../Images/Ihand.png', answer: 'I' },
+      { image: '../Images/Jhand.png', answer: 'J' },
+      { image: '../Images/Khand.png', answer: 'K' },
+      { image: '../Images/Lhand.png', answer: 'L' },
+      { image: '../Images/Mhand.png', answer: 'M' },
+      { image: '../Images/Nhand.png', answer: 'N' },
+      { image: '../Images/Ohand.png', answer: 'O' },
+      { image: '../Images/Phand.png', answer: 'P' },
+      { image: '../Images/Qhand.png', answer: 'Q' },
+      { image: '../Images/Rhand.png', answer: 'R' },
+      { image: '../Images/Shand.png', answer: 'S' },
+      { image: '../Images/Thand.png', answer: 'T' },
+      { image: '../Images/Uhand.png', answer: 'U' },
+      { image: '../Images/Vhand.png', answer: 'V' },
+      { image: '../Images/Whand.png', answer: 'W' },
+      { image: '../Images/Xhand.png', answer: 'X' },
+      { image: '../Images/Yhand.png', answer: 'Y' },
+      { image: '../Images/Zhand.png', answer: 'Z' },
+      { image: '../Images/AEhand.png', answer: 'Æ' },
+      { image: '../Images/OOhand.png', answer: 'Ø' },
+      { image: '../Images/AAhand.png', answer: 'Å' }
+    ];
+
+    let currentIndex = -1;
+    let showingAnswer = false;
+    const flashcardElement = document.getElementById('flashcard');
+
+    function getRandomIndex() {
+      let newIndex;
+      do {
+        newIndex = Math.floor(Math.random() * flashcards.length);
+      } while (newIndex === currentIndex);
+      return newIndex;
+    }
+
+    function showFlashcard() {
+      currentIndex = getRandomIndex();
+      showingAnswer = false;
+      flashcardElement.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = flashcards[currentIndex].image;
+      img.alt = `Flashcard ${flashcards[currentIndex].answer}`;
+      img.onerror = () => console.error("Error loading image:", img.src);
+      flashcardElement.appendChild(img);
+    }
+
+    function toggleFlashcard() {
+      if (showingAnswer) {
+        showFlashcard();
+      } else {
+        flashcardElement.innerHTML = `<p>${flashcards[currentIndex].answer}</p>`;
+        showingAnswer = true;
+      }
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        toggleFlashcard();
+      }
+    });
+
+    flashcardElement.addEventListener('click', toggleFlashcard);
+
+    showFlashcard();
+  </script>
+</body>
+</html>
