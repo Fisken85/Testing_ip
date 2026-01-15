@@ -1,4 +1,4 @@
-var socket = io(); 
+var socket = io.connect("https://testing-ip-vpq3.onrender.com/");
 var username = localStorage.getItem('username') || '';
 if (username) {
     socket.emit('register', { username: username });
@@ -64,7 +64,7 @@ window.sendImage = function() {
         var dataURL = evt.target.result;
         var imageId = makeImageId();
         sendChunkedImage(receiver, dataURL, imageId);
-        appendMessage('<p><b>Til ' + receiver + ':</b><br><em>Bilde sendt (chunked)</em></p>');
+        appendMessage('<p><b>Til ' + receiver + ':</b><br><em>Bilde sendt</em></p>');
     };
     reader.readAsDataURL(file);
 };
