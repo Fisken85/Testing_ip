@@ -27,7 +27,7 @@ def handle_private_message(data):
     if receiver in users:
         emit('message', {'from': sender, 'message': message}, to=users[receiver])
     else:
-        emit('message', {'from': 'system', 'message': f'User {receiver} is offline or not found.'}, to=request.sid)
+        emit('message', {'from': 'system', 'message': f'Bruker {receiver} is offline .'}, to=request.sid)
 
 @socketio.on('send_image_chunk')
 def handle_image_chunk(data):
