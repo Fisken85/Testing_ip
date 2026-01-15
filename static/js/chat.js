@@ -1,6 +1,10 @@
-var socket = io();
+var socket = io(); 
 var username = localStorage.getItem('username') || '';
-if (username) socket.emit('register', { username: username }), document.getElementById('username').value = username;
+if (username) {
+    socket.emit('register', { username: username });
+    var el = document.getElementById('username');
+    if (el) el.value = username;
+}
 
 function appendMessage(html) {
     var chat = document.getElementById('chat');
@@ -26,6 +30,30 @@ window.sendMessage = function() {
     document.getElementById('message').value = '';
 };
 
+function makeImageId() {
+    return Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,9);
+}
+
+async function sendChunkedImage(receiver, dataURL, imageId) {
+    var chunkSize = 50 * 1024;
+    var totalLength = dataURL.length;
+    var chunkCount = Math.ceil(totalLength / chunkSize);
+    for (let i = 0; i < chunkCount; i++) {
+        let start = i * chunkSize;
+        let end = Math.min((i + 1) * chunkSize, totalLength);
+        let chunk = dataURL.slice(start, end);
+        socket.emit('send_image_chunk', {
+            from: username,
+            to: receiver,
+            imageId: imageId,
+            chunkIndex: i,
+            totalChunks: chunkCount,
+            chunk: chunk
+        });
+        await new Promise(r => setTimeout(r, 5));
+    }
+}
+
 window.sendImage = function() {
     var receiver = document.getElementById('receiver').value.trim();
     var file = document.getElementById('imageInput').files[0];
@@ -34,36 +62,25 @@ window.sendImage = function() {
     var reader = new FileReader();
     reader.onload = function(evt) {
         var dataURL = evt.target.result;
-        var chunkSize = 50 * 1024;
-        var totalLength = dataURL.length;
-        var chunkCount = Math.ceil(totalLength / chunkSize);
-
-        for (let i = 0; i < chunkCount; i++) {
-            let start = i * chunkSize;
-            let end = Math.min((i + 1) * chunkSize, totalLength);
-            let chunk = dataURL.slice(start, end);
-            socket.emit('send_image_chunk', {
-                from: username,
-                to: receiver,
-                chunkIndex: i,
-                totalChunks: chunkCount,
-                chunk: chunk
-            });
-        }
-        appendMessage('<p><b>Til ' + receiver + ':</b><br><em>Bilde sendt</em></p>');
+        var imageId = makeImageId();
+        sendChunkedImage(receiver, dataURL, imageId);
+        appendMessage('<p><b>Til ' + receiver + ':</b><br><em>Bilde sendt (chunked)</em></p>');
     };
     reader.readAsDataURL(file);
 };
 
-var incomingImages = {};
+var incoming = {};
+
 socket.on('receive_image_chunk', function(data) {
-    var key = data.from + '_' + username;
-    if (!incomingImages[key]) incomingImages[key] = [];
-    incomingImages[key][data.chunkIndex] = data.chunk;
-    if (incomingImages[key].length === data.totalChunks && !incomingImages[key].includes(undefined)) {
-        var fullData = incomingImages[key].join('');
-        appendMessage('<p><b>Fra ' + data.from + ':</b><br><img src="' + fullData + '" style="max-width:300px;"></p>');
-        delete incomingImages[key];
+    var id = data.imageId;
+    var sender = data.from || 'ukjent';
+    var key = sender + '::' + id;
+    if (!incoming[key]) incoming[key] = { total: data.totalChunks, parts: [] };
+    incoming[key].parts[data.chunkIndex] = data.chunk;
+    if (incoming[key].parts.length === incoming[key].total && !incoming[key].parts.includes(undefined)) {
+        var full = incoming[key].parts.join('');
+        appendMessage('<p><b>Fra ' + sender + ':</b><br><img src="' + full + '" style="max-width:300px;"></p>');
+        delete incoming[key];
     }
 });
 
@@ -72,7 +89,7 @@ socket.on('message', function(data) {
 });
 
 window.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('registerBtn').addEventListener('click', registerUser);
-    document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
-    document.getElementById('sendImageBtn').addEventListener('click', sendImage);
+    var reg = document.getElementById('registerBtn'); if (reg) reg.addEventListener('click', registerUser);
+    var sbtn = document.getElementById('sendMsgBtn'); if (sbtn) sbtn.addEventListener('click', sendMessage);
+    var ibtn = document.getElementById('sendImageBtn'); if (ibtn) ibtn.addEventListener('click', sendImage);
 });
